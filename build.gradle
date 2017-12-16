@@ -14,11 +14,27 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication){
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url 'D:\\Development\\WorkSpace\\GitSpace\\cubesky-mvn.github.io'
+        }
+    }
 }
 
 dependencies {

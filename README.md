@@ -143,4 +143,4 @@ If you are using `Kotlin`, this will no dependency.
 If you are using `Java` , this will depend `Kotlin Standard Library JRE 8 (kotlin-stdlib-jre8)`  
 
 ## License
-This library is under GPLv3
+This library is under AGPLv3

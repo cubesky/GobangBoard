@@ -2,13 +2,17 @@
 
 package party.liyin.gobangboard
 
+import java.util.function.Function
+
 class GobangBoard {
     // x 行 y 列
     private val board = Array(15) { IntArray(15) }
     private var nowOnThink = Player.Black
     private var empty = true
-    private var lastmove = Move(Point(-1, -1), Player.NONE)
     private var boardgamestate = BoardState(null, Player.NONE)
+    private val historyMove = mutableListOf<Move>()
+    private var historyfeature = true
+    private val ruleChain = mutableListOf<Function<BoardChange, Boolean>>()
     private fun warpPlayer(player: Int) = when (player) {
         1 -> Player.Black
         2 -> Player.White
@@ -19,15 +23,20 @@ class GobangBoard {
         (0..14).forEach { x -> (0..14).forEach { y -> board[x][y] = 0 } }
         nowOnThink = Player.Black
         empty = true
-        lastmove = Move(Point(-1, -1), Player.NONE)
+        historyfeature = true
+        historyMove.clear()
         return this
     }
 
     fun place(x: Int, y: Int): Boolean {
         if (nowOnThink == Player.NONE) return false
         if (board[x][y] == 0) {
+            ruleChain.forEach {
+                if (!it.apply(BoardChange(board.clone(), Point(x, y)))) return false
+            }
             board[x][y] = nowOnThink.playerInt
-            lastmove = Move(Point(x, y), nowOnThink)
+            val lastmove = Move(Point(x, y), nowOnThink)
+            historyMove.add(lastmove)
             nowOnThink = when (nowOnThink) {
                 Player.Black -> Player.White
                 Player.White -> Player.Black
@@ -40,7 +49,26 @@ class GobangBoard {
         }
     }
 
-    fun getLastMove() = lastmove
+    fun undo(): Boolean {
+        if (hasWin().player != Player.NONE) return false
+        try {
+            val lastmove = getLastMove()
+            board[lastmove.point.x][lastmove.point.y] = 0
+            nowOnThink = lastmove.player
+            historyMove.removeAt(historyMove.size - 1)
+            return true
+        } catch (cant: NoSuchElementException) {
+            return false;
+        }
+    }
+
+    fun getLastMove(): Move {
+        try {
+            return historyMove.last()
+        } catch (cant: NoSuchElementException) {
+            return Move(Point(-1, -1), Player.NONE)
+        }
+    }
     fun getNextPlayer() = nowOnThink
     fun getBoard() = board
     fun getBoardGraph(): String {
@@ -49,7 +77,7 @@ class GobangBoard {
             (0..14).forEach { y ->
                 var prefix = " "
                 var suffix = " "
-                if (lastmove.point.x == x && lastmove.point.y == y) {
+                if (getLastMove().point.x == x && getLastMove().point.y == y) {
                     prefix = "["
                     suffix = "]"
                 }
@@ -109,6 +137,12 @@ class GobangBoard {
         } else {
             nowOnThink = Player.White
         }
+        historyfeature = false
+    }
+
+    fun getMoveHistory(): List<Move> {
+        if (!historyfeature) throw IllegalStateException("Feature is disabled")
+        return historyMove.toList()
     }
 
     fun hasWin(): BoardState {
@@ -200,5 +234,21 @@ class GobangBoard {
         }
         boardgamestate = BoardState(null, Player.NONE)
         return boardgamestate
+    }
+
+    fun clearRuleChain() {
+        if (isEmpty()) {
+            ruleChain.clear()
+        } else {
+            throw IllegalStateException("Game is start, you can not edit rules")
+        }
+    }
+
+    fun addRule(rule: Function<BoardChange, Boolean>) {
+        if (isEmpty()) {
+            ruleChain.add(rule)
+        } else {
+            throw IllegalStateException("Game is start, you can not edit rules")
+        }
     }
 }

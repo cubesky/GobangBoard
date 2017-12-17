@@ -23,7 +23,7 @@ class GobangBoard {
         return this
     }
 
-    fun setOnBoard(x: Int, y: Int): Boolean {
+    fun place(x: Int, y: Int): Boolean {
         if (nowOnThink == Player.NONE) return false
         if (board[x][y] == 0) {
             board[x][y] = nowOnThink.playerInt

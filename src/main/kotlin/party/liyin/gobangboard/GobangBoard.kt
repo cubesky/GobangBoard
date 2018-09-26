@@ -49,8 +49,8 @@ class GobangBoard {
         }
     }
 
-    fun undo(): Boolean {
-        if (hasWin().player != Player.NONE) return false
+    fun undo(force: Boolean = false): Boolean {
+        if (!force) if (hasWin().player != Player.NONE) return false
         try {
             val lastmove = getLastMove()
             board[lastmove.point.x][lastmove.point.y] = 0

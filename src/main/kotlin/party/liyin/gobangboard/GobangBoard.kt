@@ -148,7 +148,7 @@ class GobangBoard {
     fun hasWin(): BoardState {
         // 横向
         (0..14).forEach { x ->
-            (0..9).forEach { y ->
+            (0..10).forEach { y ->
                 if (board[x][y] > 0) {
                     val playerOnThis = board[x][y]
                     if ((y..y + 4).filter { board[x][it] == playerOnThis }.count() == 5) {
@@ -162,7 +162,7 @@ class GobangBoard {
             }
         }
         // 纵向
-        (0..9).forEach { x ->
+        (0..10).forEach { x ->
             (0..14).forEach { y ->
                 if (board[x][y] > 0) {
                     val playerOnThis = board[x][y]
@@ -177,8 +177,8 @@ class GobangBoard {
             }
         }
         // 斜向1 左上至右下
-        (0..9).forEach { x ->
-            (0..9).forEach { y ->
+        (0..10).forEach { x ->
+            (0..10).forEach { y ->
                 if (board[x][y] > 0) {
                     val playerOnThis = board[x][y]
                     val pd = mutableListOf<Int>()
@@ -200,7 +200,7 @@ class GobangBoard {
             }
         }
         // 斜向2 右上至左下
-        (0..9).forEach { x ->
+        (0..10).forEach { x ->
             (4..14).forEach { y ->
                 if (board[x][y] > 0) {
                     val playerOnThis = board[x][y]
